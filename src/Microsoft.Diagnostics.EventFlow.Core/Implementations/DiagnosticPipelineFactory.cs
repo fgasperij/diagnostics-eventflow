@@ -91,6 +91,13 @@ namespace Microsoft.Diagnostics.EventFlow
                     ReportSectionEmptyAndThrow(healthReporter, outputConfigurationSection);
                 }
 
+                
+                // Build the EventFlowHostOutput 
+                string eventFlowHostOutputFactoryTypeName = "Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutputFactory, Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutput, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+                var eventFlowHostFactoryType = Type.GetType(eventFlowHostOutputFactoryTypeName, throwOnError: true);
+                IPipelineItemFactory<IOutput> eventFlowHostOutputFactory = Activator.CreateInstance(eventFlowHostFactoryType) as IPipelineItemFactory<IOutput>;
+                IOutput eventFlowHostOutput = eventFlowHostOutputFactory.CreateItem(outputConfigurationSection, healthReporter);
+                // Build the rest of the outputs
                 List<ItemWithChildren<IOutput, IFilter>> outputCreationResult;
                 outputCreationResult = ProcessSection<IOutput, IFilter>(
                     outputConfigurationSection,
@@ -100,6 +107,8 @@ namespace Microsoft.Diagnostics.EventFlow
                     childSectionName: "filters");
 
                 List<IOutput> outputs = outputCreationResult.Select(item => item.Item).ToList();
+                // Add eventFlowHostOutput to the other outputs
+                outputs.Add(eventFlowHostOutput);
                 if (outputs.Count == 0)
                 {
                     ReportNoItemsCreatedAndThrow(healthReporter, outputConfigurationSection);
@@ -197,6 +206,8 @@ namespace Microsoft.Diagnostics.EventFlow
             }
 
             List<IConfigurationSection> itemConfigurationFragments = configurationSection.GetChildren().ToList();
+            // TODO: who should be responsible of performing the filter?
+            HashSet<string> redirectedOutputsBlacklist = new HashSet<string> { "StdOut" };
 
             foreach (var itemFragment in itemConfigurationFragments)
             {
@@ -211,6 +222,10 @@ namespace Microsoft.Diagnostics.EventFlow
                 }
 
                 string itemFactoryTypeName;
+                if (typeof(PipelineItemType) == typeof(IOutput) && !redirectedOutputsBlacklist.Contains(itemConfiguration.Type))
+                {
+                    continue;
+                }
                 if (!itemFactories.TryGetValue(itemConfiguration.Type, out itemFactoryTypeName))
                 {
                     ReportUnknownItemTypeAndThrow(healthReporter, configurationSection, itemConfiguration);
