@@ -11,11 +11,16 @@ using Microsoft.Diagnostics.EventFlow.Configuration;
 using Microsoft.Diagnostics.EventFlow.HealthReporters;
 using Microsoft.Extensions.Configuration;
 using Validation;
+using System.Text;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Microsoft.Diagnostics.EventFlow
 {
     public class DiagnosticPipelineFactory
     {
+        private static bool isUsingEventFlowHost;
+        private static string stringConfig;
         private class ExtensionCategories
         {
             public static readonly string HealthReporter = "healthReporter";
@@ -27,7 +32,7 @@ namespace Microsoft.Diagnostics.EventFlow
         public static DiagnosticPipeline CreatePipeline(string jsonConfigFilePath)
         {
             IConfiguration config = new ConfigurationBuilder().AddJsonFile(jsonConfigFilePath).Build();
-
+            DiagnosticPipelineFactory.stringConfig = File.ReadAllText(jsonConfigFilePath);
             return CreatePipeline(config);
         }
 
@@ -46,6 +51,12 @@ namespace Microsoft.Diagnostics.EventFlow
             IDictionary<string, string> outputFactories;
             IDictionary<string, string> filterFactories;
             CreateItemFactories(configuration, healthReporter, out inputFactories, out outputFactories, out filterFactories);
+
+            if (configuration["eventFlowHost"] != null)
+            {
+                DiagnosticPipelineFactory.isUsingEventFlowHost = true;
+            }
+                
 
             // Step 1: instantiate inputs
             IConfigurationSection inputConfigurationSection = configuration.GetSection("inputs");
@@ -86,11 +97,14 @@ namespace Microsoft.Diagnostics.EventFlow
 
                 // Step 3: instantiate outputs
                 IConfigurationSection outputConfigurationSection = configuration.GetSection("outputs");
+                List<IConfigurationSection> the_list = outputConfigurationSection.GetChildren().ToList();
+                string jsonConfig = JsonConvert.SerializeObject(the_list);
                 if (outputConfigurationSection.GetChildren().Count() == 0)
                 {
                     ReportSectionEmptyAndThrow(healthReporter, outputConfigurationSection);
                 }
 
+                // Build the rest of the outputs
                 List<ItemWithChildren<IOutput, IFilter>> outputCreationResult;
                 outputCreationResult = ProcessSection<IOutput, IFilter>(
                     outputConfigurationSection,
@@ -100,6 +114,17 @@ namespace Microsoft.Diagnostics.EventFlow
                     childSectionName: "filters");
 
                 List<IOutput> outputs = outputCreationResult.Select(item => item.Item).ToList();
+                // Add eventFlowHostOutput to the other outputs
+                if (isUsingEventFlowHost)
+                {
+                    // Build the EventFlowHostOutput 
+                    string eventFlowHostOutputFactoryTypeName = "Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutputFactory, Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+                    var eventFlowHostFactoryType = Type.GetType(eventFlowHostOutputFactoryTypeName, throwOnError: true);
+                    IEventFlowOutputItemFactory<IOutput> eventFlowHostOutputFactory = Activator.CreateInstance(eventFlowHostFactoryType) as IEventFlowOutputItemFactory<IOutput>;
+                    IOutput eventFlowHostOutput = eventFlowHostOutputFactory.CreateItem(stringConfig, healthReporter);
+                    outputs.Add(eventFlowHostOutput);
+                    outputCreationResult.Add(new ItemWithChildren<IOutput, IFilter>(eventFlowHostOutput, null));
+                }
                 if (outputs.Count == 0)
                 {
                     ReportNoItemsCreatedAndThrow(healthReporter, outputConfigurationSection);
@@ -197,6 +222,7 @@ namespace Microsoft.Diagnostics.EventFlow
             }
 
             List<IConfigurationSection> itemConfigurationFragments = configurationSection.GetChildren().ToList();
+            HashSet<string> redirectedOutputsBlacklist = new HashSet<string> { "StdOutput" };
 
             foreach (var itemFragment in itemConfigurationFragments)
             {
@@ -211,6 +237,10 @@ namespace Microsoft.Diagnostics.EventFlow
                 }
 
                 string itemFactoryTypeName;
+                if (isUsingEventFlowHost && typeof(PipelineItemType) == typeof(IOutput) && !redirectedOutputsBlacklist.Contains(itemConfiguration.Type))
+                {
+                    continue;
+                }
                 if (!itemFactories.TryGetValue(itemConfiguration.Type, out itemFactoryTypeName))
                 {
                     ReportUnknownItemTypeAndThrow(healthReporter, configurationSection, itemConfiguration);

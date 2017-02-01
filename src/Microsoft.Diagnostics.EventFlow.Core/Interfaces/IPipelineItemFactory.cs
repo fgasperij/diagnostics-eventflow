@@ -11,4 +11,9 @@ namespace Microsoft.Diagnostics.EventFlow
     {
         ItemType CreateItem(IConfiguration configuration, IHealthReporter healthReporter);
     }
+
+    public interface IEventFlowOutputItemFactory<out ItemType>
+    {
+        ItemType CreateItem(string configuration, IHealthReporter healthReporter);
+    }
 }
