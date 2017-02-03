@@ -10,7 +10,9 @@
 
   "frameworks": {
     "net451": {
-
+      "frameworkAssemblies": {
+        "System.ServiceModel": "4.0.0.0"
+      }
     }
   },
 

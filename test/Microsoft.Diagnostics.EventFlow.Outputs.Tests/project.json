@@ -30,6 +30,7 @@
     "net46": {
       "dependencies": {
         "Microsoft.Diagnostics.EventFlow.Inputs.EventSource": { "target": "project" },
+        "Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost": "1.0.0-*",
         "Microsoft.NETCore.Platforms": "1.0.1",
         "xunit.runner.visualstudio": "2.2.0-beta2-build1149"
       }

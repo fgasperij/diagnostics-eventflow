@@ -9,8 +9,8 @@ namespace Microsoft.Diagnostics.EventFlow.Outputs
         public EventFlowHostOutput CreateItem(IConfiguration outputsConfiguration, IHealthReporter healthReporter)
         {
             Requires.NotNull(healthReporter, nameof(healthReporter));
-            Task<EventFlowHostOutput> outputTask = EventFlowHostOutput.CreateAsync(outputsConfiguration, healthReporter);
-            EventFlowHostOutput output = outputTask.Result;
+            EventFlowHostOutput output = new EventFlowHostOutput(outputsConfiguration, healthReporter);
+
             return output;
         }
     }
