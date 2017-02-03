@@ -22,6 +22,7 @@ namespace Microsoft.Diagnostics.EventFlow.Outputs
         private const string Dot = ".";
         private const string Dash = "-";
 
+        private Guid guid;
         private ElasticSearchConnectionData connectionData;
         // TODO: support for multiple ES nodes/connection pools, for failover and load-balancing        
 
@@ -33,6 +34,8 @@ namespace Microsoft.Diagnostics.EventFlow.Outputs
             Requires.NotNull(healthReporter, nameof(healthReporter));
 
             this.healthReporter = healthReporter;
+            guid = Guid.NewGuid();
+            Console.WriteLine($"Creating ElasticSearchOutput {guid}");
             var esOutputConfiguration = new ElasticSearchOutputConfiguration();
             try
             {
@@ -82,6 +85,7 @@ namespace Microsoft.Diagnostics.EventFlow.Outputs
 
                 foreach (EventData eventData in events)
                 {
+                    eventData.AddPayloadProperty("the_output", guid, healthReporter, "");
                     operations.AddRange(GetCreateOperationsForEvent(eventData, currentIndexName, documentTypeName));
                 }
 

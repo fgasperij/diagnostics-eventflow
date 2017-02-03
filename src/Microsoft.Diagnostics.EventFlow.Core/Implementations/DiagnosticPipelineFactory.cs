@@ -211,6 +211,7 @@ namespace Microsoft.Diagnostics.EventFlow
                 }
 
                 string itemFactoryTypeName;
+                
                 if (!itemFactories.TryGetValue(itemConfiguration.Type, out itemFactoryTypeName))
                 {
                     ReportUnknownItemTypeAndThrow(healthReporter, configurationSection, itemConfiguration);
@@ -314,10 +315,11 @@ namespace Microsoft.Diagnostics.EventFlow
             Debug.Assert(healthReporter != null);
 
             inputFactories = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            inputFactories["EventSource"] = "Microsoft.Diagnostics.EventFlow.Inputs.EventSourceInputFactory, Microsoft.Diagnostics.EventFlow.Inputs.EventSource, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+            inputFactories["EventSource"] = "Microsoft.Diagnostics.Even tFlow.Inputs.EventSourceInputFactory, Microsoft.Diagnostics.EventFlow.Inputs.EventSource, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
             inputFactories["PerformanceCounter"] = "Microsoft.Diagnostics.EventFlow.Inputs.PerformanceCounterInputFactory, Microsoft.Diagnostics.EventFlow.Inputs.PerformanceCounter, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
             inputFactories["Trace"] = "Microsoft.Diagnostics.EventFlow.Inputs.TraceInputFactory, Microsoft.Diagnostics.EventFlow.Inputs.Trace, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
             inputFactories["Serilog"] = "Microsoft.Diagnostics.EventFlow.Inputs.SerilogInputFactory, Microsoft.Diagnostics.EventFlow.Inputs.Serilog, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+            inputFactories["EventFlow"] = "Microsoft.Diagnostics.EventFlow.Inputs.EventFlowInputFactory, Microsoft.Diagnostics.EventFlow.Inputs.EventFlow, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
             inputFactories["Microsoft.Extensions.Logging"] = "Microsoft.Diagnostics.EventFlow.Inputs.LoggerInputFactory, Microsoft.Diagnostics.EventFlow.Inputs.MicrosoftLogging, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
 
             outputFactories = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

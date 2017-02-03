@@ -14,10 +14,13 @@ try
 
     if ($CleanDestinationFolder -and (Test-Path "$destination"))
     {
+	Write-Host "Cleaning destination folder."
         Remove-Item "$destination" -Recurse -Force
     }
 
     $nugetProjects = &'findstr.exe' /sm packOptions project.json
+    
+    Write-Host "nugetProjects: $nugetProjects"
 
     $nugetCmd = Join-Path $PSScriptRoot nuget.exe
 
