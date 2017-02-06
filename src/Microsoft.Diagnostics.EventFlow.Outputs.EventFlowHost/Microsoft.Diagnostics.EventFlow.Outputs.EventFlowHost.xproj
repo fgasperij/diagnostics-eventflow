@@ -7,7 +7,7 @@
   <Import Project="..\..\targets\DotNet\Microsoft.DotNet.Props" />
   <PropertyGroup Label="Globals">
     <ProjectGuid>ef4b9b49-1372-4a4b-9e20-a2c1adabeb64</ProjectGuid>
-    <RootNamespace>Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost</RootNamespace>
+    <RootNamespace>Microsoft.Diagnostics.EventFlow.Outputs</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
