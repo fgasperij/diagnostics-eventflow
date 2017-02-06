@@ -16,6 +16,7 @@ namespace Microsoft.Diagnostics.EventFlow
 {
     public class DiagnosticPipelineFactory
     {
+        private static bool isUsingEventFlowHost;
         private class ExtensionCategories
         {
             public static readonly string HealthReporter = "healthReporter";
@@ -46,6 +47,12 @@ namespace Microsoft.Diagnostics.EventFlow
             IDictionary<string, string> outputFactories;
             IDictionary<string, string> filterFactories;
             CreateItemFactories(configuration, healthReporter, out inputFactories, out outputFactories, out filterFactories);
+
+            if (configuration["eventFlowHost"] != null)
+            {
+                DiagnosticPipelineFactory.isUsingEventFlowHost = true;
+            }
+                
 
             // Step 1: instantiate inputs
             IConfigurationSection inputConfigurationSection = configuration.GetSection("inputs");
@@ -91,12 +98,6 @@ namespace Microsoft.Diagnostics.EventFlow
                     ReportSectionEmptyAndThrow(healthReporter, outputConfigurationSection);
                 }
 
-                
-                // Build the EventFlowHostOutput 
-                string eventFlowHostOutputFactoryTypeName = "Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutputFactory, Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutput, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
-                var eventFlowHostFactoryType = Type.GetType(eventFlowHostOutputFactoryTypeName, throwOnError: true);
-                IPipelineItemFactory<IOutput> eventFlowHostOutputFactory = Activator.CreateInstance(eventFlowHostFactoryType) as IPipelineItemFactory<IOutput>;
-                IOutput eventFlowHostOutput = eventFlowHostOutputFactory.CreateItem(outputConfigurationSection, healthReporter);
                 // Build the rest of the outputs
                 List<ItemWithChildren<IOutput, IFilter>> outputCreationResult;
                 outputCreationResult = ProcessSection<IOutput, IFilter>(
@@ -108,7 +109,15 @@ namespace Microsoft.Diagnostics.EventFlow
 
                 List<IOutput> outputs = outputCreationResult.Select(item => item.Item).ToList();
                 // Add eventFlowHostOutput to the other outputs
-                outputs.Add(eventFlowHostOutput);
+                if (isUsingEventFlowHost)
+                {
+                    // Build the EventFlowHostOutput 
+                    string eventFlowHostOutputFactoryTypeName = "Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutputFactory, Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutput, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+                    var eventFlowHostFactoryType = Type.GetType(eventFlowHostOutputFactoryTypeName, throwOnError: true);
+                    IPipelineItemFactory<IOutput> eventFlowHostOutputFactory = Activator.CreateInstance(eventFlowHostFactoryType) as IPipelineItemFactory<IOutput>;
+                    IOutput eventFlowHostOutput = eventFlowHostOutputFactory.CreateItem(outputConfigurationSection, healthReporter);
+                    outputs.Add(eventFlowHostOutput);
+                }
                 if (outputs.Count == 0)
                 {
                     ReportNoItemsCreatedAndThrow(healthReporter, outputConfigurationSection);
@@ -222,7 +231,7 @@ namespace Microsoft.Diagnostics.EventFlow
                 }
 
                 string itemFactoryTypeName;
-                if (typeof(PipelineItemType) == typeof(IOutput) && !redirectedOutputsBlacklist.Contains(itemConfiguration.Type))
+                if (isUsingEventFlowHost && typeof(PipelineItemType) == typeof(IOutput) && !redirectedOutputsBlacklist.Contains(itemConfiguration.Type))
                 {
                     continue;
                 }
