@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.ServiceFabric.Services.Remoting.Client;
 using Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost;
 using System.ServiceModel;
 
@@ -25,7 +24,7 @@ namespace Microsoft.Diagnostics.EventFlow.Outputs
 
                 NetNamedPipeBinding binding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None);
                 EndpointAddress ep = new EndpointAddress(address);
-                IEventFlowHostServiceContract eventFlowHostChannel = ChannelFactory<IEventFlowHostServiceContract>.CreateChannel(binding, ep);
+                this.eventFlowHostChannel = ChannelFactory<IEventFlowHostServiceContract>.CreateChannel(binding, ep);
 
                 this.token = eventFlowHostChannel.StartSession(outputsConfiguration);
             }
@@ -37,7 +36,7 @@ namespace Microsoft.Diagnostics.EventFlow.Outputs
         }
         public Task SendEventsAsync(IReadOnlyCollection<EventData> events, long transmissionSequenceNumber, CancellationToken cancellationToken)
         {
-            eventFlowHostChannel.ReceiveBatch(token, events);
+            this.eventFlowHostChannel.ReceiveBatch(token, events);
 
             return Task.FromResult<object>(null);
         }

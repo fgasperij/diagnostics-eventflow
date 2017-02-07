@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ServiceModel;
 using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost
 {
+    [ServiceContract(Namespace = "eventflow/eventflowhost")]
     interface IEventFlowHostServiceContract
     {   
         [OperationContract]
