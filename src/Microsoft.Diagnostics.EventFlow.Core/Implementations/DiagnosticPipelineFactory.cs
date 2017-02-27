@@ -11,6 +11,8 @@ using Microsoft.Diagnostics.EventFlow.Configuration;
 using Microsoft.Diagnostics.EventFlow.HealthReporters;
 using Microsoft.Extensions.Configuration;
 using Validation;
+using System.Text;
+using System.IO;
 
 namespace Microsoft.Diagnostics.EventFlow
 {
@@ -112,11 +114,12 @@ namespace Microsoft.Diagnostics.EventFlow
                 if (isUsingEventFlowHost)
                 {
                     // Build the EventFlowHostOutput 
-                    string eventFlowHostOutputFactoryTypeName = "Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutputFactory, Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutput, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+                    string eventFlowHostOutputFactoryTypeName = "Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutputFactory, Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
                     var eventFlowHostFactoryType = Type.GetType(eventFlowHostOutputFactoryTypeName, throwOnError: true);
                     IPipelineItemFactory<IOutput> eventFlowHostOutputFactory = Activator.CreateInstance(eventFlowHostFactoryType) as IPipelineItemFactory<IOutput>;
                     IOutput eventFlowHostOutput = eventFlowHostOutputFactory.CreateItem(outputConfigurationSection, healthReporter);
                     outputs.Add(eventFlowHostOutput);
+                    outputCreationResult.Add(new ItemWithChildren<IOutput, IFilter>(eventFlowHostOutput, null));
                 }
                 if (outputs.Count == 0)
                 {

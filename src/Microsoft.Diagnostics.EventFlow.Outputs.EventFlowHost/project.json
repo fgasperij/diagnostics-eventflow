@@ -2,8 +2,8 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "Microsoft.Diagnostics.Correlation.Common": "1.0.0-preview1",
-    "Microsoft.Diagnostics.EventFlow.Core": { "target": "project" }
+    "Microsoft.Diagnostics.EventFlow.Core": { "target": "project" },
+    "System.Collections.Immutable": "1.2.0"
   },
 
   "frameworks": {

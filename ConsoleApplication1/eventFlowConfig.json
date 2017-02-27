@@ -1,0 +1,19 @@
+﻿{
+  "inputs": [
+    {
+      "type": "Trace",
+      "traceLevel": "Warning"
+    }
+  ],
+  "outputs": [
+    {
+      "type": "StdOutput"
+    },
+    {
+      "type": "ElasticSearch",
+      "indexNamePrefix": "testingBroadcastBlock-",
+      "serviceUri": "https://localhost:9200",
+      "eventDocumentTypeName": "diagData"
+    }
+  ]
+}

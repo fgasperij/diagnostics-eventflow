@@ -383,6 +383,7 @@ namespace Microsoft.Diagnostics.EventFlow
 
             public async Task SendDataAsync(EventData[] events)
             {
+                Thread.Sleep(TimeSpan.FromMilliseconds(10000));
                 if (events.Length > 0)
                 {
                     try

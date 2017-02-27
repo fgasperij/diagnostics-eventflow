@@ -1,0 +1,14 @@
+﻿{
+  "inputs": [
+    {
+      "type": "Trace",
+      "traceLevel": "Warning"
+    }
+  ],
+  "outputs": [
+    {
+      "type": "EventFlow"
+    }
+  ],
+  "eventFlowHost": true
+}
