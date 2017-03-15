@@ -116,9 +116,9 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Diagnostics.Event
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Diagnostics.EventFlow.Inputs.MicrosoftLogging", "src\Microsoft.Diagnostics.EventFlow.Inputs.MicrosoftLogging\Microsoft.Diagnostics.EventFlow.Inputs.MicrosoftLogging.xproj", "{E987F059-33CD-4F0E-8680-63C8033D54D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventFlowHost", "src\HostWantToBeWindowsClassicDesktopConsole\EventFlowHost.csproj", "{793733F7-7221-4454-863A-5C60A3FFE94E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventFlowHost", "src\EventFlowHost\EventFlowHost.csproj", "{793733F7-7221-4454-863A-5C60A3FFE94E}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RemoteService", "src\RemoteWantToBeCoreLibrary\RemoteService.xproj", "{5A8148EC-2030-4FE9-9D24-11A5ECD4D830}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RemoteService", "src\RemoteService\RemoteService.xproj", "{5A8148EC-2030-4FE9-9D24-11A5ECD4D830}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RemoteServiceTests", "src\RemoteServiceTests\RemoteServiceTests.xproj", "{59125C38-2013-466E-938D-F5790815EFE4}"
 EndProject
