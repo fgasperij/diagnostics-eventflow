@@ -7,8 +7,8 @@
 
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>c0d72cbd-a28b-4347-bd2f-c2fc97a32757</ProjectGuid>
-    <RootNamespace>HostWantToBeCoreConsole</RootNamespace>
+    <ProjectGuid>59125c38-2013-466e-938d-f5790815efe4</ProjectGuid>
+    <RootNamespace>RemoteServiceTests</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
