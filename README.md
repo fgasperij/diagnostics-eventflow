@@ -17,6 +17,7 @@ It runs in the same process as the application, so communication overhead is min
 - [Azure EventHub](#event-hub)
 - [Elastisearch](#elasticsearch)
 - [OMS (Operations Management Suite)](#oms-operations-management-suite)
+- [EventFlowHost](#event-flow-host)
 
 The EventFlow suite supports .NET applications and .NET Core applications. It allows diagnostic data to be collected and transferred for applications running in these Azure environments:
 
@@ -411,6 +412,27 @@ Supported configuration settings are:
 | `workspaceKey` | string (base-64) | Yes | Specifies the workspace authentication key. |
 | `logTypeName` | string | No | Specifies the log entry type created by the output. Default value for this setting is "Event", which results in "Event_CL" entries being created in OMS (the "_CL" suffix is appended automatically by OMS ingestion service). |
 
+#### EventFlowHost
+
+*Nuget package*: [**Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost**](https://www.nuget.org/packages/Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost/)
+
+The EventFlowHost output allows your application to use an EventFlowHost instance as a proxy for event outputs. This is useful when there is a big number of
+EventFlow instances running on the same machine and the connections used by their outputs become a bottleneck. Setting up EventFlowHost output requires that an EventFlowHost instance
+is running on the same machine. If EventFlowHost output is set up events will only be output by StdOutput and EventFlowHost output, all the other outputs will only be set up on the
+EventFlowHost instance and be output from them.
+Here is a sample configuration fragment enabling the output:
+```json
+{
+  "type": "EventFlowHost"
+}
+```
+
+Supported configuration settings are:
+
+| Field | Values/Types | Required | Description |
+| :---- | :-------------- | :------: | :---------- |
+| `type` | "EventFlowHost" | Yes | Specifies the output type. For this output, it must be "EventFlowHost". |
+
 ### Filters
 As data comes through the EventFlow pipeline, the application can add extra processing or tagging to them. These optional operations are accomplished with filters. Filters can transform, drop, or tag data with extra metadata, with rules based on custom expressions.
 With metadata tags, filters and outputs operating further down the pipeline can apply different processing for different data. For example, an output component can choose to send only data with a certain tag. Each filter type has its own set of parameters.
@@ -617,6 +639,7 @@ The following table lists platform support for standard inputs and outputs.
 | [Azure EventHub](#event-hub) | Yes | Yes | No |
 | [Elasticsearch](#elasticsearch) | Yes | Yes | Yes |
 | [OMS (Operations Management Suite)](#oms-operations-management-suite) | Yes | Yes | Yes |
+| [EventFlowHost](#event-flow-host) | Yes | Yes | Yes |
 
 ## Contribution
 Refer to [contribution guide](contributing.md)
