@@ -19,8 +19,7 @@ namespace Microsoft.Diagnostics.EventFlow
 {
     public class DiagnosticPipelineFactory
     {
-        private static bool isUsingEventFlowHost;
-        private static string stringConfig;
+        private static string configurationFileContents;
         private class ExtensionCategories
         {
             public static readonly string HealthReporter = "healthReporter";
@@ -32,7 +31,7 @@ namespace Microsoft.Diagnostics.EventFlow
         public static DiagnosticPipeline CreatePipeline(string jsonConfigFilePath)
         {
             IConfiguration config = new ConfigurationBuilder().AddJsonFile(jsonConfigFilePath).Build();
-            DiagnosticPipelineFactory.stringConfig = File.ReadAllText(jsonConfigFilePath);
+            DiagnosticPipelineFactory.configurationFileContents = File.ReadAllText(jsonConfigFilePath);
             return CreatePipeline(config);
         }
 
@@ -52,9 +51,10 @@ namespace Microsoft.Diagnostics.EventFlow
             IDictionary<string, string> filterFactories;
             CreateItemFactories(configuration, healthReporter, out inputFactories, out outputFactories, out filterFactories);
 
+            bool isUsingEventFlowHost = false;
             if (configuration["eventFlowHost"] != null)
             {
-                DiagnosticPipelineFactory.isUsingEventFlowHost = true;
+                isUsingEventFlowHost = true;
             }
                 
 
@@ -70,8 +70,9 @@ namespace Microsoft.Diagnostics.EventFlow
                 inputConfigurationSection,
                 healthReporter,
                 inputFactories,
-                childFactories: null,
-                childSectionName: null);
+                null, // childFactories
+                null, // childSectionName
+                isUsingEventFlowHost);
 
             List<IObservable<EventData>> inputs = inputCreationResult.Select(item => item.Item).ToList();
             if (inputs.Count == 0)
@@ -90,9 +91,10 @@ namespace Microsoft.Diagnostics.EventFlow
                     globalFilterConfigurationSection,
                     healthReporter,
                     filterFactories,
-                    childFactories: null,
-                    childSectionName: null);
-                List<IFilter> globalFilters = globalFilterCreationResult.Select(item => item.Item).ToList();
+                    null, // childFactories
+                    null, // childSectionName
+                    isUsingEventFlowHost);
+                List <IFilter> globalFilters = globalFilterCreationResult.Select(item => item.Item).ToList();
 
 
                 // Step 3: instantiate outputs
@@ -111,7 +113,8 @@ namespace Microsoft.Diagnostics.EventFlow
                     healthReporter,
                     outputFactories,
                     filterFactories,
-                    childSectionName: "filters");
+                    "filters", // childSectionName
+                    isUsingEventFlowHost);
 
                 List<IOutput> outputs = outputCreationResult.Select(item => item.Item).ToList();
                 // Add eventFlowHostOutput to the other outputs
@@ -121,7 +124,7 @@ namespace Microsoft.Diagnostics.EventFlow
                     string eventFlowHostOutputFactoryTypeName = "Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHostOutputFactory, Microsoft.Diagnostics.EventFlow.Outputs.EventFlowHost, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
                     var eventFlowHostFactoryType = Type.GetType(eventFlowHostOutputFactoryTypeName, throwOnError: true);
                     IEventFlowOutputItemFactory<IOutput> eventFlowHostOutputFactory = Activator.CreateInstance(eventFlowHostFactoryType) as IEventFlowOutputItemFactory<IOutput>;
-                    IOutput eventFlowHostOutput = eventFlowHostOutputFactory.CreateItem(stringConfig, healthReporter);
+                    IOutput eventFlowHostOutput = eventFlowHostOutputFactory.CreateItem(configurationFileContents, healthReporter);
                     outputs.Add(eventFlowHostOutput);
                     outputCreationResult.Add(new ItemWithChildren<IOutput, IFilter>(eventFlowHostOutput, null));
                 }
@@ -207,7 +210,8 @@ namespace Microsoft.Diagnostics.EventFlow
             IHealthReporter healthReporter,
             IDictionary<string, string> itemFactories,
             IDictionary<string, string> childFactories,
-            string childSectionName)
+            string childSectionName,
+            bool isUsingEventFlowHost)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(configurationSection.Key));
             Debug.Assert(healthReporter != null);
@@ -273,9 +277,9 @@ namespace Microsoft.Diagnostics.EventFlow
                         childrenSection,
                         healthReporter,
                         childFactories,
-                        childFactories: null,       // Only one level of nexting is supported
-                        childSectionName: null);
-
+                        null, // childFactories
+                        null, // childSectionName
+                        isUsingEventFlowHost);
                     createdItems.Add(new ItemWithChildren<PipelineItemType, PipelineItemChildType>(item, children.Select(c => c.Item).ToList()));
                 }
                 else
